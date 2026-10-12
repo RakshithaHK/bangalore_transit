@@ -7,8 +7,8 @@ import pipelines as P
 app = Flask(__name__)
 mongo_uri = os.getenv("MONGO_URI")
 if not mongo_uri:
-    if os.getenv("RENDER"):
-        raise RuntimeError("Set MONGO_URI in Render to the MongoDB Atlas connection string.")
+    if os.getenv("RENDER") or os.getenv("VERCEL"):
+        raise RuntimeError("Set MONGO_URI in your hosting provider's environment variables to the MongoDB Atlas connection string.")
     mongo_uri = "mongodb://localhost:27017"
 db = MongoClient(mongo_uri)[os.getenv("DB_NAME", "bangalore_transit")]
 
