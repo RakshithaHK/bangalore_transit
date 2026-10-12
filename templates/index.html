@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Namma Metro &amp; BMTC Ridership</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--ink:#1a1e3a;--mute:#5d6481;--bg:#eef1f7;--card:#fff;--bd:#dde2ee;--pur:#7b2d8e;--grn:#1e9e5a;--amb:#f2a900;--slate:#9aa5cf;--focus:#3b5bdb}
+@media(prefers-color-scheme:dark){:root{--ink:#e8ebf8;--mute:#9aa2c0;--bg:#12152b;--card:#1b1f3d;--bd:#2d3259;--slate:#59629a}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 'DM Sans',system-ui,sans-serif}
+h1,h2,.num{font-family:Sora,'DM Sans',sans-serif}
+header{background:#1a1e3a;color:#fff;padding:28px 20px 22px}
+.wrap{max-width:1180px;margin:0 auto}
+.hd{display:flex;gap:24px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+h1{font-size:clamp(22px,3.4vw,32px);margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+header p{margin:0;color:#b9c0e6;max-width:52ch}
+header svg{width:min(340px,100%);height:auto}
+.bar{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0 6px;align-items:center}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;color:var(--mute);font:500 14px 'DM Sans';padding:7px 15px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.seg button[data-c=Purple][aria-pressed=true]{background:var(--pur);color:#fff}.seg button[data-c=Green][aria-pressed=true]{background:var(--grn);color:#fff}
+button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.lbl{font-size:13px;color:var(--mute);margin-right:6px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:14px 0}
+.k{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;border-left:6px solid var(--slate)}
+.k:nth-child(1){border-left-color:var(--pur)}.k:nth-child(2){border-left-color:var(--grn)}.k:nth-child(3){border-left-color:var(--amb)}
+.k small{color:var(--mute);display:block}.k .num{font-size:26px;font-weight:700;line-height:1.25;margin:2px 0}.k span{font-size:13px;color:var(--mute)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-bottom:28px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:18px;min-width:0}
+.s5{grid-column:span 5}.s7{grid-column:span 7}.s12{grid-column:span 12}
+@media(max-width:900px){.s5,.s7{grid-column:span 12}}
+h2{font-size:16px;margin:0 0 2px}.sub{color:var(--mute);font-size:13px;margin:0 0 12px}
+.chart{position:relative;height:300px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--bd);background:none;color:var(--ink);border-radius:999px;padding:4px 11px;font:400 13px 'DM Sans';cursor:pointer}
+.chip:hover{border-color:var(--ink)}
+.key{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--mute);margin-right:12px}.key i{width:10px;height:10px;border-radius:3px;display:inline-block}
+input{width:100%;max-width:340px;padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--ink);font:400 15px 'DM Sans'}
+ul.ins{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px 24px}
+ul.ins li{padding-left:14px;border-left:3px solid var(--amb)}
+#err{background:#fde8e8;color:#8a1c1c;border-radius:10px;padding:12px 16px;margin:14px 0}
+footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 28px}
+</style></head><body>
+<header><div class="wrap hd"><div>
+<h1>Namma Metro &amp; BMTC ridership</h1>
+<p>See which stations are busiest and when Bengaluru rides. Simulated data for 1 to 30 September 2026.</p></div>
+<svg viewBox="0 0 340 64" role="img" aria-label="Purple and green metro lines crossing at an interchange" fill="none" stroke-width="6" stroke-linecap="round">
+<path d="M6 18H140L190 46H334" stroke="#b565d0"/><path d="M6 46H140L190 18H334" stroke="#3fcb86"/>
+<circle cx="165" cy="32" r="9" fill="#1a1e3a" stroke="#fff" stroke-width="4"/>
+<g fill="#1a1e3a" stroke-width="3" stroke="#fff"><circle cx="40" cy="18" r="4"/><circle cx="95" cy="18" r="4"/><circle cx="240" cy="46" r="4"/><circle cx="295" cy="46" r="4"/><circle cx="40" cy="46" r="4"/><circle cx="95" cy="46" r="4"/><circle cx="240" cy="18" r="4"/><circle cx="295" cy="18" r="4"/></g></svg></div></header>
+<main class="wrap">
+<div class="bar" id="filters">
+<div><span class="lbl">Line</span><span class="seg" data-k="line"><button data-v="" aria-pressed="true">All lines</button><button data-v="Purple" data-c="Purple" aria-pressed="false">Purple</button><button data-v="Green" data-c="Green" aria-pressed="false">Green</button></span></div>
+<div><span class="lbl">Days</span><span class="seg" data-k="day"><button data-v="" aria-pressed="true">All days</button><button data-v="weekday" aria-pressed="false">Weekdays</button><button data-v="weekend" aria-pressed="false">Weekends</button></span></div></div>
+<div id="err" hidden role="alert">Could not load data. Check that MongoDB is running and that you ran generate_data.py, then refresh.</div>
+<section class="kpis" aria-live="polite">
+<div class="k"><small>Metro entries</small><div class="num" id="k1">...</div><span id="k1s"></span></div>
+<div class="k"><small>Busiest station</small><div class="num" id="k2">...</div><span id="k2s"></span></div>
+<div class="k"><small>Busiest hour</small><div class="num" id="k3">...</div><span id="k3s"></span></div>
+<div class="k"><small>Weekend vs weekday</small><div class="num" id="k4">...</div><span id="k4s"></span></div></section>
+<section class="card s12" style="margin-bottom:16px"><h2>What the data says</h2><p class="sub">Updates when you change the filters.</p><ul class="ins" id="ins"></ul></section>
+<div class="grid">
+<section class="card s7"><h2>Top 10 busiest stations</h2><p class="sub">Total entries in the month.</p><div><span class="key"><i style="background:var(--pur)"></i>Purple line</span><span class="key"><i style="background:var(--grn)"></i>Green line</span></div><div class="chart"><canvas id="top"></canvas></div></section>
+<section class="card s5"><h2>Peak hours</h2><p class="sub">Entries by hour of day. Amber marks the rush.</p><div class="chart" style="height:340px"><canvas id="peak"></canvas></div></section>
+<section class="card s12"><h2>Daily ridership</h2><p class="sub">Dips show weekends.</p><div class="chart" style="height:240px"><canvas id="trend"></canvas></div></section>
+<section class="card s7"><h2>Station explorer</h2><p class="sub">Pick any station to compare its weekday and weekend day.</p>
+<input id="st" list="stl" placeholder="Search a station, e.g. Indiranagar" aria-label="Search a station" autocomplete="off"><datalist id="stl"></datalist>
+<div class="chips" id="chips"></div><div class="chart" style="height:260px"><canvas id="stc"></canvas></div></section>
+<section class="card s5"><h2>Top BMTC bus routes</h2><p class="sub">Passengers in the month.</p><div><span class="key"><i style="background:#3b82c4"></i>AC</span><span class="key"><i style="background:var(--slate)"></i>Ordinary</span><span class="key"><i style="background:#e0652b"></i>Vayu Vajra</span></div><div class="chart" style="height:320px"><canvas id="bus"></canvas></div></section>
+</div></main>
+<footer>MongoDB aggregation pipelines power every chart on this page.</footer>
+<script>
+const $=s=>document.querySelector(s),state={line:'',day:''},charts={},stn={};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt=n=>n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(Math.round(n));
+const hr=h=>(h%12||12)+(h<12?' AM':' PM');
+const LC={Purple:'#7b2d8e',Green:'#1e9e5a'},BC={AC:'#3b82c4',Ordinary:'#9aa5cf','Vayu Vajra':'#e0652b'};
+const j=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u);return r.json()});
+const qs=()=>new URLSearchParams(state);
+function draw(id,cfg){charts[id]?.destroy();
+ const mute=css('--mute'),grid=css('--bd');
+ cfg.options=Object.assign({maintainAspectRatio:false,animation:matchMedia('(prefers-reduced-motion:reduce)').matches?false:{duration:500},
+  plugins:{legend:{display:cfg.legend||false,labels:{color:mute}}},
+  scales:{x:{ticks:{color:mute,maxRotation:0,autoSkip:true},grid:{display:false}},y:{ticks:{color:mute,callback:v=>fmt(v)},grid:{color:grid}}}},cfg.options||{});
+ if(cfg.options.indexAxis==='y'){cfg.options.scales={x:{ticks:{color:mute,callback:v=>fmt(v)},grid:{color:grid}},y:{ticks:{color:mute},grid:{display:false}}}}
+ charts[id]=new Chart($('#'+id),cfg)}
+async function load(){
+ try{const q=qs(),[s,t,p,d,b]=await Promise.all([j('/api/summary?'+q),j('/api/top-stations?'+q),j('/api/peak-hours?'+q),j('/api/daily-trend?'+q),j('/api/bmtc-routes')]);
+  $('#err').hidden=true;
+  $('#k1').textContent=fmt(s.total);$('#k1s').textContent=fmt(s.avg_day)+' on an average day';
+  $('#k2').textContent=s.busiest?s.busiest.station:'n/a';$('#k2s').textContent=s.busiest?fmt(s.busiest.total)+' entries, '+s.busiest.line+' line':'';
+  $('#k3').textContent=s.peak_hour?hr(s.peak_hour.hour):'n/a';$('#k3s').textContent=s.peak_hour?fmt(s.peak_hour.total)+' entries in that hour':'';
+  $('#k4').textContent=s.weekend_drop==null?'n/a':s.weekend_drop+'% lower';$('#k4s').textContent='Average entries per station-day';
+  draw('top',{type:'bar',data:{labels:t.map(x=>x.station),datasets:[{data:t.map(x=>x.total),backgroundColor:t.map(x=>LC[x.line]),borderRadius:4}]},options:{indexAxis:'y'}});
+  const mx=Math.max(...p.map(x=>x.total));
+  draw('peak',{type:'bar',data:{labels:p.map(x=>hr(x.hour)),datasets:[{data:p.map(x=>x.total),backgroundColor:p.map(x=>x.total>=.85*mx?'#f2a900':css('--slate')),borderRadius:4}]}});
+  draw('trend',{type:'line',data:{labels:d.map(x=>x.date.slice(8)+' Sep'),datasets:[{data:d.map(x=>x.total),borderColor:'#7b2d8e',backgroundColor:'rgba(123,45,142,.12)',fill:true,tension:.3,pointRadius:2}]}});
+  draw('bus',{type:'bar',data:{labels:b.map(x=>x.route),datasets:[{data:b.map(x=>x.passengers),backgroundColor:b.map(x=>BC[x.type]),borderRadius:4}]},options:{indexAxis:'y'}});
+  const am=p.filter(x=>x.hour<12).sort((a,c)=>c.total-a.total)[0],pm=p.filter(x=>x.hour>=12).sort((a,c)=>c.total-a.total)[0],L=[];
+  if(am&&pm)L.push(`The ${hr(pm.hour)} rush is ${Math.abs(Math.round((pm.total/am.total-1)*100))}% ${pm.total>=am.total?'busier':'quieter'} than the ${hr(am.hour)} rush.`);
+  if(t.length>1)L.push(`${t[0].station} sees ${(t[0].total/t[t.length-1].total).toFixed(1)}x the entries of ${t[t.length-1].station}, the 10th busiest.`);
+  if(s.weekend_drop!=null)L.push(`Weekend ridership per station drops ${s.weekend_drop}% compared with weekdays.`);
+  if(b[0])L.push(`Bus route ${b[0].route} (${b[0].path}) carries the most passengers: ${fmt(b[0].passengers)}.`);
+  $('#ins').innerHTML=L.map(x=>`<li>${x}</li>`).join('')}
+ catch(e){$('#err').hidden=false}}
+document.querySelectorAll('.seg').forEach(g=>g.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));state[g.dataset.k]=b.dataset.v;load()}));
+async function showStation(sid){
+ try{const r=await j('/api/station/'+sid),H=[...new Set(r.rows.map(x=>x.hour))],v=w=>H.map(h=>(r.rows.find(x=>x.hour===h&&x.weekend===w)||{}).avg);
+  draw('stc',{type:'line',legend:true,data:{labels:H.map(hr),datasets:[{label:'Weekday',data:v(false),borderColor:LC[r.station.line],tension:.3,pointRadius:2},{label:'Weekend',data:v(true),borderColor:'#f2a900',borderDash:[6,4],tension:.3,pointRadius:2}]}})}
+ catch(e){$('#err').hidden=false}}
+async function showStation(sid){
+ if(!sid)return;
+ try{const r=await j('/api/station/'+sid),H=[...new Set(r.rows.map(x=>x.hour))],v=w=>H.map(h=>(r.rows.find(x=>x.hour===h&&x.weekend===w)||{}).avg);
+  draw('stc',{type:'line',legend:true,data:{labels:H.map(hr),datasets:[{label:'Weekday',data:v(false),borderColor:LC[r.station.line],tension:.3,pointRadius:2},{label:'Weekend',data:v(true),borderColor:'#f2a900',borderDash:[6,4],tension:.3,pointRadius:2}]}})}
+ catch(e){console.warn(e)}}
+async function init(){
+ load();
+ try{const l=await j('/api/stations');l.forEach(s=>stn[s.name]=s.station_id);
+  $('#stl').innerHTML=l.map(s=>`<option value="${s.name}">`).join('');
+  ['Majestic','MG Road','KR Puram','Indiranagar','Whitefield (Kadugodi)','Banashankari'].filter(n=>stn[n]).forEach(n=>{
+   const c=document.createElement('button');c.className='chip';c.textContent=n;c.onclick=()=>{$('#st').value=n;showStation(stn[n])};$('#chips').append(c)});
+  $('#st').addEventListener('input',e=>{if(stn[e.target.value])showStation(stn[e.target.value])});
+  const first=stn['Majestic']?'Majestic':(l[0]&&l[0].name);
+  if(first){$('#st').value=first;showStation(stn[first])}}
+ catch(e){console.warn(e)}}
+init();
+</script></body></html>
