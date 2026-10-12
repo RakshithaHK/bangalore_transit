@@ -53,7 +53,7 @@ footer{color:var(--mute);font-size:13px;text-align:center;padding:0 20px 28px}
 <div class="bar" id="filters">
 <div><span class="lbl">Line</span><span class="seg" data-k="line"><button data-v="" aria-pressed="true">All lines</button><button data-v="Purple" data-c="Purple" aria-pressed="false">Purple</button><button data-v="Green" data-c="Green" aria-pressed="false">Green</button></span></div>
 <div><span class="lbl">Days</span><span class="seg" data-k="day"><button data-v="" aria-pressed="true">All days</button><button data-v="weekday" aria-pressed="false">Weekdays</button><button data-v="weekend" aria-pressed="false">Weekends</button></span></div></div>
-<div id="err" hidden role="alert">Could not load data. Check that MongoDB is running and that you ran generate_data.py, then refresh.</div>
+<div id="err" hidden role="alert">Could not load dashboard data. Check the application logs and confirm that MONGO_URI and DB_NAME point to the database where you loaded data. If the database is empty, run generate_data.py once with those same settings, then refresh.</div>
 <section class="kpis" aria-live="polite">
 <div class="k"><small>Metro entries</small><div class="num" id="k1">...</div><span id="k1s"></span></div>
 <div class="k"><small>Busiest station</small><div class="num" id="k2">...</div><span id="k2s"></span></div>
@@ -87,6 +87,7 @@ function draw(id,cfg){charts[id]?.destroy();
  charts[id]=new Chart($('#'+id),cfg)}
 async function load(){
  try{const q=qs(),[s,t,p,d,b]=await Promise.all([j('/api/summary?'+q),j('/api/top-stations?'+q),j('/api/peak-hours?'+q),j('/api/daily-trend?'+q),j('/api/bmtc-routes')]);
+  if(!s.data_available){$('#err').hidden=false;return}
   $('#err').hidden=true;
   $('#k1').textContent=fmt(s.total);$('#k1s').textContent=fmt(s.avg_day)+' on an average day';
   $('#k2').textContent=s.busiest?s.busiest.station:'n/a';$('#k2s').textContent=s.busiest?fmt(s.busiest.total)+' entries, '+s.busiest.line+' line':'';

@@ -5,7 +5,12 @@ from pymongo import MongoClient
 import pipelines as P
 
 app = Flask(__name__)
-db = MongoClient(os.getenv("MONGO_URI", "mongodb://localhost:27017"))[os.getenv("DB_NAME", "bangalore_transit")]
+mongo_uri = os.getenv("MONGO_URI")
+if not mongo_uri:
+    if os.getenv("RENDER"):
+        raise RuntimeError("Set MONGO_URI in Render to the MongoDB Atlas connection string.")
+    mongo_uri = "mongodb://localhost:27017"
+db = MongoClient(mongo_uri)[os.getenv("DB_NAME", "bangalore_transit")]
 
 def flt(use_day=True):
     """Build a $match filter from ?line=Purple|Green and ?day=weekday|weekend."""
@@ -31,7 +36,7 @@ def summary():
     peaks = agg("ridership", P.PEAK_HOURS, flt())
     dt = {d["day_type"]: d["avg_station_day"] for d in agg("ridership", P.WEEKDAY_VS_WEEKEND, flt(False))}
     drop = round((1 - dt["Weekend"] / dt["Weekday"]) * 100, 1) if dt.get("Weekday") and dt.get("Weekend") else None
-    return jsonify(total=total, avg_day=round(total / len(trend)) if trend else 0,
+    return jsonify(data_available=bool(trend), total=total, avg_day=round(total / len(trend)) if trend else 0,
                    busiest=top[0] if top else None,
                    peak_hour=max(peaks, key=lambda x: x["total"]) if peaks else None, weekend_drop=drop)
 
