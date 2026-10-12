@@ -23,7 +23,7 @@
    Environment variables: `MONGO_URI` = the same Atlas URI used to load the data; `DB_NAME` = the same database name (defaults to `bangalore_transit`)
 5. Open the Render URL.
 
-The app intentionally uses `mongodb://localhost:27017` as its default only for local development. On Render, it refuses to start if `MONGO_URI` is missing rather than silently connecting to an unavailable local MongoDB. If the site opens but shows no data, check that the Atlas cluster allows connections from the hosting service, and that the seed command and Render service use the same `MONGO_URI` and `DB_NAME`.
+The app intentionally uses `mongodb://localhost:27017` as its default only for local development. On Render or Vercel, it refuses to start if `MONGO_URI` is missing rather than silently connecting to an unavailable local MongoDB. For Vercel, add `MONGO_URI` and (if changed from the default) `DB_NAME` under **Project Settings -> Environment Variables**, enable them for the deployment environment, and redeploy. If the site opens but shows no data, check that the Atlas cluster allows connections from the hosting service, and that the seed command and hosted app use the same `MONGO_URI` and `DB_NAME`.
 
 ## mongosh equivalents (for the report)
 use bangalore_transit
